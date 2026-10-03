@@ -1,0 +1,31 @@
+# 遊戲視窗標題（子字串比對，不分大小寫）。用 `python capture.py --list` 查看目前所有視窗標題
+window_title: "MapleStory Worlds-Artale"
+
+# 擷取範圍 ROI：相對於視窗「客戶區」左上角的像素 [x, y, 寬, 高]
+# 用 `python capture.py --calibrate` 取得整窗截圖後，量出價格表格的位置填入
+table_roi: [395, 195, 775, 415]
+
+# 「下一頁」箭頭按鈕位置：相對於視窗客戶區左上角的像素 [x, y]
+next_button: [820, 145]
+
+# 頁碼「1 / 20」所在範圍 [x, y, 寬, 高]（相對視窗客戶區）：每頁用 OCR 讀取，驗證翻頁是否成功
+page_roi: [700, 132, 160, 26]
+
+# 各欄位在 ROI 內的 x 範圍 [起, 迄)：道具名稱 / 每個價錢(單位價格) / 剩下時間(日期時間)
+name_x: [40, 220]
+unit_x: [465, 615]
+time_x: [620, 775]
+
+# 搜尋框位置（相對視窗客戶區）：開始擷取前會先點這裡再按 Enter 更新頁面
+search_box: [350, 37]
+refresh_wait: 2.0    # 按 Enter 後等待結果載入的秒數
+
+pages: 20            # 要擷取的頁數
+start_delay: 3       # 啟動後倒數秒數（讓你切回遊戲畫面）
+page_wait: 0.8       # 點下一頁後等待畫面更新的秒數
+
+data_dir: data
+
+# 官方管道（WC）成本：花多少台幣買多少張突襲卷
+official_price_twd: 1990
+official_tickets: 77

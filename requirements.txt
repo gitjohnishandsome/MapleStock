@@ -1,0 +1,9 @@
+pywin32
+pyautogui
+mss
+opencv-python
+rapidocr-onnxruntime
+pandas
+openpyxl
+plotly
+pyyaml

@@ -1,0 +1,47 @@
+# 武器製作配方：每把武器固定 6 個材料欄位（名稱 + 需求數量）。
+# 要新增武器，照同樣格式加一筆即可，不用改程式。
+weapons:
+  - name: 強化顯聖槍
+    materials:
+      - {name: 幻龍長槍, qty: 1}
+      - {name: 時間碎片, qty: 60}
+      - {name: 時間精髓, qty: 1}
+      - {name: 黃晶, qty: 15}
+      - {name: 黑水晶, qty: 8}
+      - {name: 力量水晶, qty: 10}
+
+  - name: 強化靜電弓
+    materials:
+      - {name: 龍形之弓, qty: 1}
+      - {name: 時間碎片, qty: 60}
+      - {name: 時間精髓, qty: 1}
+      - {name: 蛋白石, qty: 15}
+      - {name: 鑽石, qty: 8}
+      - {name: 敏捷水晶, qty: 10}
+
+  - name: 強化碎黿斧
+    materials:
+      - {name: 龍王之斧, qty: 1}
+      - {name: 時間碎片, qty: 60}
+      - {name: 時間精髓, qty: 1}
+      - {name: 藍寶石, qty: 15}
+      - {name: 祖母綠, qty: 8}
+      - {name: 力量水晶, qty: 10}
+
+  - name: 強化冥雷弩
+    materials:
+      - {name: 飛龍弩, qty: 1}
+      - {name: 時間碎片, qty: 60}
+      - {name: 時間精髓, qty: 1}
+      - {name: 蛋白石, qty: 15}
+      - {name: 鑽石, qty: 8}
+      - {name: 敏捷水晶, qty: 10}
+
+  - name: 強化玄冥劍
+    materials:
+      - {name: 狂龍劍, qty: 1}
+      - {name: 時間碎片, qty: 60}
+      - {name: 時間精髓, qty: 1}
+      - {name: 蛋白石, qty: 15}
+      - {name: 黑水晶, qty: 8}
+      - {name: 力量水晶, qty: 10}

@@ -26,6 +26,14 @@ page_wait: 0.8       # 點下一頁後等待畫面更新的秒數
 
 data_dir: data
 
-# 官方管道（WC）成本：花多少台幣買多少張突襲卷
-official_price_twd: 1990
-official_tickets: 77
+# 追蹤的商品清單。match：用來比對 OCR 讀到的「道具名稱」的關鍵字（子字串即可，不分商品）。
+# official_price_twd / official_tickets：官方管道（WC）成本，沒設定就不會顯示該商品的比較功能。
+items:
+  - name: 突襲額外獎勵票券
+    match: 突
+    official_price_twd: 1990
+    official_tickets: 77
+  - name: SP初始化卷
+    match: SP
+    official_price_twd: 1990
+    official_tickets: 44

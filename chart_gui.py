@@ -5,18 +5,31 @@ import webbrowser
 from tkinter import messagebox, ttk
 
 import capture
+import catalog
 import chart
+import compare
 import db
 
 
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("突襲卷 K 線圖")
-        self.geometry("640x500")
+        self.title("K 線圖")
+        self.geometry("640x540")
 
+        self.cfg = capture.load_config()
         self.status = tk.StringVar()
         ttk.Label(self, textvariable=self.status, padding=8, font=("", 10, "bold")).pack(fill="x")
+
+        pick = ttk.LabelFrame(self, text="商品", padding=8)
+        pick.pack(fill="x", padx=8, pady=4)
+        self.item = tk.StringVar()
+        self.item_box = ttk.Combobox(pick, textvariable=self.item, width=24, state="readonly",
+                                      values=db.list_items())
+        self.item_box.pack(side="left")
+        self.item_box.bind("<<ComboboxSelected>>", lambda _e: self.update_status())
+        if self.item_box["values"]:
+            self.item.set(self.item_box["values"][0])
 
         show = ttk.LabelFrame(self, text="顯示範圍", padding=8)
         show.pack(fill="x", padx=8, pady=4)
@@ -28,15 +41,16 @@ class App(tk.Tk):
         line.pack(fill="x", padx=8, pady=4)
         ttk.Label(line, text="買幣價：1 億楓幣 = NT$").pack(side="left")
         self.rate = tk.StringVar()
-        ttk.Entry(line, textvariable=self.rate, width=10).pack(side="left", padx=6)
-        ttk.Label(line, foreground="#666",
-                  text="填了會畫一條虛線＝官方管道每張換算的楓幣價；K 棒在線下＝拍賣行較便宜").pack(side="left")
+        self.rate_entry = ttk.Entry(line, textvariable=self.rate, width=10)
+        self.rate_entry.pack(side="left", padx=6)
+        self.rate_note = ttk.Label(line, foreground="#666",
+                                    text="填了會畫一條虛線＝官方管道每張換算的楓幣價；K 棒在線下＝拍賣行較便宜")
+        self.rate_note.pack(side="left")
 
         ttk.Button(self, text="產生 K 線圖", command=self.make).pack(pady=8)
         self.info = tk.Text(self, height=12, state="disabled")
         self.info.pack(fill="both", expand=True, padx=8, pady=(0, 8))
-        n, lo, hi = db.count()
-        self.status.set(f"資料庫：{n} 天（{lo} ～ {hi}）" if n else "資料庫目前是空的，請先用「資料匯入」匯入 Excel")
+        self.update_status()
 
     def log(self, text):
         self.info.config(state="normal")
@@ -44,7 +58,26 @@ class App(tk.Tk):
         self.info.insert("end", text)
         self.info.config(state="disabled")
 
+    def update_status(self):
+        item = self.item.get()
+        if not item:
+            return self.status.set("資料庫目前是空的，請先用「資料匯入」匯入 Excel")
+        n, lo, hi = db.count(item)
+        self.status.set(f"「{item}」：{n} 天（{lo} ～ {hi}）" if n else f"「{item}」目前沒有資料")
+
+        item_cfg = catalog.find(self.cfg, item)
+        has_rate = bool(item_cfg) and compare.has_official_price(item_cfg)
+        self.rate_entry.config(state="normal" if has_rate else "disabled")
+        if not has_rate:
+            self.rate.set("")
+            self.rate_note.config(text="此商品尚未在 config.yaml 設定官方價格，無法畫等值線")
+        else:
+            self.rate_note.config(text="填了會畫一條虛線＝官方管道每張換算的楓幣價；K 棒在線下＝拍賣行較便宜")
+
     def make(self):
+        item = self.item.get()
+        if not item:
+            return messagebox.showwarning("提示", "資料庫是空的，請先用「資料匯入」匯入 Excel")
         rate = None
         if self.rate.get().strip():
             try:
@@ -54,15 +87,16 @@ class App(tk.Tk):
             except ValueError:
                 return messagebox.showwarning("提示", "買幣價請輸入正數，或留空不畫等值線")
         scope = self.scope.get()
-        c = db.load_daily(None if scope == "all" else int(scope))
+        c = db.load_daily(item, None if scope == "all" else int(scope))
         if c.empty:
-            n, lo, hi = db.count()
-            hint = f"\n目前資料庫的資料範圍是 {lo} ～ {hi}，可改選「全部」。" if n else "\n資料庫是空的，請先用「資料匯入」匯入 Excel。"
+            n, lo, hi = db.count(item)
+            hint = f"\n「{item}」的資料範圍是 {lo} ～ {hi}，可改選「全部」。" if n else "\n「{item}」目前沒有資料，請先用「資料匯入」匯入 Excel。"
             return messagebox.showwarning("提示", "這個範圍內沒有資料。" + hint)
         label = {"7": "近一週", "30": "近一個月", "all": "全部"}[scope]
+        item_cfg = catalog.find(self.cfg, item)
         out = os.path.join(capture.ROOT, "kline.html")
         with open(out, "w", encoding="utf-8") as f:
-            f.write(chart.build_html(c, f"突襲卷 K 線（{label}）", rate))
+            f.write(chart.build_html(c, f"{item} K 線（{label}）", rate, item_cfg))
         d = chart.prepare(c)
         gaps = chart.missing_dates(d)
         lines = [f"{label}：{len(c)} 根 K 棒" + (f"，另加官方等值線（1e=NT${rate:g}）" if rate else ""), ""]

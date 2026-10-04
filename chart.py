@@ -53,7 +53,7 @@ def missing_dates(d):
     return [x for x in full if x not in set(d["d"])]
 
 
-def build_fig(d, title, rate=None):
+def build_fig(d, title, rate=None, item_cfg=None):
     div = 10000.0
     hover = []
     for r in d.itertuples():
@@ -79,8 +79,8 @@ def build_fig(d, title, rate=None):
             x=bad["d"], y=bad["high"] / div, mode="text", text="⚠", textposition="top center",
             textfont=dict(size=16, color="#f9a825"), hoverinfo="skip", name="資料可能不完整"))
 
-    if rate:
-        each = compare.compare(rate, 1)["official_mesos_each"]
+    if rate and item_cfg:
+        each = compare.compare(item_cfg, rate, 1)["official_mesos_each"]
         fig.add_hline(y=each / div, line_dash="dash", line_color="#1e88e5",
                       annotation_text=f"官方管道等值 {wan(each)}／張（1億＝NT${rate:g}）",
                       annotation_position="top left", annotation_font_color="#1e88e5")
@@ -150,9 +150,9 @@ document.querySelectorAll('#t th').forEach((th,i)=>{let asc=false;th.addEventLis
 """
 
 
-def build_html(c, title="突襲卷 K 線", rate=None):
+def build_html(c, title="K 線", rate=None, item_cfg=None):
     d = prepare(c)
-    fig = build_fig(d, title, rate)
+    fig = build_fig(d, title, rate, item_cfg)
     gaps = missing_dates(d)
     gap_html = ""
     if gaps:

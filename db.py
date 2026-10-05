@@ -80,7 +80,7 @@ def _ts(v, day=None):
     return f"{pd.Timestamp(v):%Y-%m-%d %H:%M:%S}"
 
 
-def _hms(s):
+def hms(s):
     """日期時間欄 → 只留時間 HH:MM:SS 的字串（Excel 顯示用）。"""
     return pd.to_datetime(s).dt.strftime("%H:%M:%S")
 
@@ -123,7 +123,7 @@ def make_ohlc_excel(scrape_paths, out_path, cfg=None):
     if len(c) > 1:  # 防呆：一份 OHLC 只能是同一天
         raise ValueError("所選資料包含不同日期：" + "、".join(c["date"]) + "\n同一份 OHLC 只能是同一天，請移除不同日期的檔案。")
     pd.DataFrame({"商品": item["name"], "日期": c["date"], "開盤價": c["open"], "最高價": c["high"], "最低價": c["low"],
-                  "收盤價": c["close"], "開盤時間": _hms(c["open_time"]), "收盤時間": _hms(c["close_time"])}
+                  "收盤價": c["close"], "開盤時間": hms(c["open_time"]), "收盤時間": hms(c["close_time"])}
                  ).to_excel(out_path, index=False)
     return len(c)
 
@@ -205,7 +205,7 @@ def load_daily(item, days=None):
 def export_daily_excel(path, item):
     df = load_daily(item)
     pd.DataFrame({"商品": item, "日期": df["date"], "開盤價": df["open"], "最高價": df["high"], "最低價": df["low"],
-                  "收盤價": df["close"], "開盤時間": _hms(df["open_time"]), "收盤時間": _hms(df["close_time"])}
+                  "收盤價": df["close"], "開盤時間": hms(df["open_time"]), "收盤時間": hms(df["close_time"])}
                  ).to_excel(path, index=False)
     return len(df)
 

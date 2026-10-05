@@ -94,12 +94,15 @@ class App(tk.Tk):
             return messagebox.showwarning("提示", "這個範圍內沒有資料。" + hint)
         label = {"7": "近一週", "30": "近一個月", "all": "全部"}[scope]
         item_cfg = catalog.find(self.cfg, item)
-        out = os.path.join(capture.ROOT, "kline.html")
+        kline_dir = os.path.join(capture.ROOT, capture.load_config().get("data_dir", "data"), "kline")
+        os.makedirs(kline_dir, exist_ok=True)
+        out = os.path.join(kline_dir, f"kline_{item}_{label}.html")
         with open(out, "w", encoding="utf-8") as f:
             f.write(chart.build_html(c, f"{item} K 線（{label}）", rate, item_cfg))
         d = chart.prepare(c)
         gaps = chart.missing_dates(d)
-        lines = [f"{label}：{len(c)} 根 K 棒" + (f"，另加官方等值線（1e=NT${rate:g}）" if rate else ""), ""]
+        lines = [f"{label}：{len(c)} 根 K 棒" + (f"，另加官方等值線（1e=NT${rate:g}）" if rate else ""),
+                 f"已存成：{out}", ""]
         for r in d.itertuples():
             lines.append(f"{r.d:%Y-%m-%d}  開 {chart.wan(r.open)}  高 {chart.wan(r.high)}  低 {chart.wan(r.low)}  "
                          f"收 {chart.wan(r.close)}" + (f"  ⚠ {r.warn}" if r.warn else ""))

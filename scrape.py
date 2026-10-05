@@ -24,6 +24,7 @@ import win32api
 import capture
 import catalog
 import ocr
+import store
 
 ESC = 0x1B
 PAGE_RE = re.compile(r"(\d+)\s*[/／]\s*(\d+)")
@@ -181,7 +182,7 @@ def main():
         sys.exit("沒有辨識到任何資料")
     ok = df[~df["待確認"]].sort_values("日期時間", na_position="last")
     out = pd.concat([ok, df[df["待確認"]]])
-    day_dir = os.path.join(data_dir, item["name"], datetime.now().strftime("%Y-%m-%d"))
+    day_dir = os.path.join(data_dir, item["name"], store.today_trading_date())
     os.makedirs(day_dir, exist_ok=True)  # 當天資料夾已存在則不重建
     out_path = os.path.join(day_dir, f"scrape_{stamp}.xlsx")
     out.to_excel(out_path, index=False)

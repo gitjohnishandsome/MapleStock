@@ -16,6 +16,7 @@ import pandas as pd
 import capture
 import catalog
 import ocr
+import store
 
 PAGE_NUM_RE = re.compile(r"(\d+)")
 
@@ -84,7 +85,7 @@ def main():
 
     data_dir = os.path.join(capture.ROOT, cfg["data_dir"])
     stamp = datetime.now().strftime("%Y%m%d_%H%M")
-    day_dir = os.path.join(data_dir, item["name"], datetime.now().strftime("%Y-%m-%d"))
+    day_dir = os.path.join(data_dir, item["name"], store.today_trading_date())
     os.makedirs(day_dir, exist_ok=True)
     out_path = os.path.join(day_dir, f"scrape_fromimg_{stamp}.xlsx")
     out.to_excel(out_path, index=False)

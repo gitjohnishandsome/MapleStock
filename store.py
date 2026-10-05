@@ -8,11 +8,17 @@ import os
 import pandas as pd
 
 DAY_CUTOFF_HOUR = 1  # 凌晨 0~1 點的資料算前一天（熬夜玩到跨午夜也算同一天）
+SUSPECT_FACTOR = 3  # 單價偏離中位數超過這個倍率，列為可疑紀錄供人工複核
 
 
 def trading_date(dt):
     """回傳「交易日」（午夜正規化）：凌晨 DAY_CUTOFF_HOUR 點前的時間算前一天。"""
     return (dt - pd.Timedelta(hours=DAY_CUTOFF_HOUR)).dt.normalize()
+
+
+def today_trading_date():
+    """現在時刻對應的交易日字串 YYYY-MM-DD（套用 DAY_CUTOFF_HOUR）；擷取存檔用的資料夾日期。"""
+    return f"{(pd.Timestamp.now() - pd.Timedelta(hours=DAY_CUTOFF_HOUR)).normalize():%Y-%m-%d}"
 
 
 def load_files(paths):
@@ -47,6 +53,31 @@ def _ohlc(g, open_day=None, close_day=None):
     close_time, close_price = _nearest(g, close_day + pd.Timedelta(hours=24))
     return {"open_time": open_time, "close_time": close_time, "open": open_price, "close": close_price,
             "high": g["單位價格"].max(), "low": g["單位價格"].min(), "rows": len(g)}
+
+
+def suspects(df, factor=SUSPECT_FACTOR):
+    """標記合併時可能有問題的列，多一欄「原因」，依單價由高到低排序，供人工複核、勾選排除用：
+    - 單價異常：偏離中位數超過 factor 倍（像拍賣行亂喊價、或誤歸類的不同道具）。
+    - 跨日：交易日跟多數列不同（例如選錯資料夾、資料剛好跨到隔天）。
+    """
+    if df.empty:
+        return df.assign(原因=[])
+
+    med = df["單位價格"].median()
+    days = trading_date(df["日期時間"])
+    main_day = days.value_counts().idxmax()
+
+    reasons = []
+    for price, day in zip(df["單位價格"], days):
+        r = []
+        if med > 0 and (price > med * factor or price < med / factor):
+            r.append("單價異常")
+        if day != main_day:
+            r.append("跨日")
+        reasons.append("、".join(r))
+
+    out = df.assign(原因=reasons)
+    return out[out["原因"] != ""].sort_values("單位價格", ascending=False)
 
 
 def candles(df, period="day"):

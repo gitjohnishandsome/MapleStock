@@ -37,3 +37,5 @@ items:
     match: SP
     official_price_twd: 1990
     official_tickets: 44
+  - name: 力量母礦
+    match: 力
